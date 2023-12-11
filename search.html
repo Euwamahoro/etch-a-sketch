@@ -3,20 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search</title>
-    <link rel="stylesheet" href="./CSS/styles.css">
-    <script src="https://kit.fontawesome.com/ef21a6ce15.js" crossorigin="anonymous"></script>
+    <title>Weather Information</title>
+    <style>
+        #search-bar {
+            margin: 20px;
+        }
+        #results {
+            margin: 20px;
+        }
+    </style>
 </head>
 <body>
-    <div class="search-bar">
-        <div class="row">
-            <input type="text" name="search" id="search-box" placeholder="Search for football information" autocomplete="off">
-            <button><i class="fa-solid fa-magnifying-glass"></i></button>
-        </div>
-        <div class="results">
-        </div>
-       
-    </div>
-    <script src="script.js"></script>
+
+    <div id="results"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const resultsContainer = document.getElementById('results');
+
+            // Function to fetch weather data from a public weather API
+            async function fetchWeatherData(country) {
+                const apiUrl = `https://api.open-meteo.com/weather?forecast=24h&daily=7&timezone=Europe%2FBerlin&country=${country}`;
+
+                try {
+                    const response = await fetch(apiUrl);
+
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch weather data');
+                    }
+
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('Error fetching weather data:', error.message);
+                    return null;
+                }
+            }
+
+            // Function to display weather results
+            function displayWeatherResults(weatherData) {
+                if (!weatherData) {
+                    resultsContainer.innerHTML = 'Failed to fetch weather data.';
+                    return;
+                }
+
+                // Customize the display based on the structure of the weather data
+                const formattedResults = JSON.stringify(weatherData, null, 2);
+
+                resultsContainer.innerHTML = `<pre>${formattedResults}</pre>`;
+            }
+
+            // Fetch weather data for a specific country (e.g., Germany)
+            const countryToSearch = 'Germany';
+            const weatherData = await fetchWeatherData(countryToSearch);
+            displayWeatherResults(weatherData);
+        });
+    </script>
+
 </body>
 </html>
