@@ -1,58 +1,58 @@
-let availableKeyWords = [
-    'live score',
-    'premier league',
-    'serie a',
-    'la liga',
-    'bundesliga',
-    'transfer news',
-    'ucl',
-    'europa league',
-    'top scorers',
-    'lionel messi',
-    'cristian ronaldo',
-    'haaland',
-    'mbappe',
-    'bellingham',
-    'man u',
-    'barca',
-    'man city',
-    'chelsea',
-    'liverpool',
-    'psg',
-    'guardiola',
-    'kloop',
-    'ten haag'
+// script.js
 
-];
+document.addEventListener('DOMContentLoaded', function () {
+    const searchBox = document.getElementById('search-box');
+    const resultsContainer = document.querySelector('.results');
 
-const resultsBox = document.querySelector(".results");
-const inputBox = document.getElementById("search-box");
+    // Function to fetch football data from the API
+    async function fetchFootballData(teamName) {
+        const apiUrl = `https://www.football-api.com/api/v1/teams?name=${teamName}`;
 
-inputBox.onkeyup = function() {
-    let result = [];
-    let input = inputBox.value;
-    if (input.length) {
-        result = availableKeyWords.filter((keyword)=>{
-            return keyword.toLowerCase().includes(input.toLowerCase());
+        try {
+            const response = await fetch(apiUrl);
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch data');
+            }
+
+            const data = await response.json();
+            return data.teams;
+        } catch (error) {
+            console.error('Error fetching data:', error.message);
+            return [];
+        }
+    }
+
+    // Function to display search results
+    function displayResults(teams) {
+        resultsContainer.innerHTML = '';
+
+        if (teams.length === 0) {
+            resultsContainer.innerHTML = 'No results found.';
+            return;
+        }
+
+        const list = document.createElement('ul');
+
+        teams.forEach(team => {
+            const listItem = document.createElement('li');
+            listItem.textContent = team.name;
+            list.appendChild(listItem);
         });
-        console.log(result);       
-    }
-    display(result);
 
-    if(!result.length) {
-        resultsBox.innerHTML = '';
+        resultsContainer.appendChild(list);
     }
-}
 
-function display(result){
-    const content = result.map((list)=>{
-        return "<li onclick=selectInput(this)>" + list + "</li>";
+    // Event listener for the search input
+    searchBox.addEventListener('input', async () => {
+        const searchTerm = searchBox.value.trim();
+
+        if (searchTerm === '') {
+            resultsContainer.innerHTML = '';
+            return;
+        }
+
+        const teams = await fetchFootballData(searchTerm);
+        displayResults(teams);
     });
-
-    resultsBox.innerHTML = "<ul>" + content.join('') + "</ul>";
-}
-
-function selectInput(list) {
-    inputBox.value = list.innerHTML;
-    resultsBox.innerHTML = '';
-}
+});
